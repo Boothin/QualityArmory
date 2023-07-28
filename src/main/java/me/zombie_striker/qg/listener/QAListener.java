@@ -39,6 +39,16 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 
+/***************************************************
+ * BC ADDITION
+ ***************************************************/
+
+import org.bukkit.command.ConsoleCommandSender;
+
+/***************************************************
+ *
+ ***************************************************/
+
 import java.util.ArrayList;
 
 public class QAListener implements Listener {
@@ -393,6 +403,31 @@ public class QAListener implements Listener {
 
 		// player inv
 
+		/***************************************************
+		 * BC ADDITION
+		 ***************************************************/
+
+		if (e.getRawSlot() == 5 && (e.getClickedInventory() == e.getWhoClicked().getInventory()) && QualityArmory.isGun(e.getCursor())) {
+			e.setCancelled(true);
+			ItemStack hat = e.getCurrentItem();
+			ItemStack cursor = e.getCursor();
+			Player p =  (Player) e.getWhoClicked();
+			QAMain.DEBUG("clicked head slot: " + p.getInventory().getHelmet());
+			if (QualityArmory.isGun(cursor)) {
+				QAMain.DEBUG("onInvClick hat slot - gun cursor: " + QualityArmory.isGun(e.getWhoClicked().getItemOnCursor()));
+				if (p.hasPermission("group.donator1")) {
+					QAMain.DEBUG("hatting gun");
+					p.getInventory().setItem(39, cursor);
+					p.setItemOnCursor(hat);
+				}
+			}
+			return;
+		}
+
+		/***************************************************
+		 *
+		 ***************************************************/
+
 		if ((e.getCurrentItem() != null && QualityArmory.isIronSights(e.getCurrentItem()))) {
 			e.setCancelled(true);
 			return;
@@ -647,6 +682,22 @@ public class QAListener implements Listener {
 			Player killer = e.getEntity().getKiller();
 			if (QualityArmory.isGun(killer.getItemInHand()) || QualityArmory.isIronSights(killer.getItemInHand())) {
 				DEBUG("This player \"" + e.getEntity().getName() + "\" was killed by a player with a gun");
+
+				/**********************************************
+				 * BC ADDITION
+				 **********************************************/
+
+				ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+				for(String command : QAMain.DeathCommand) {
+					command = command.replaceAll("%killer%", killer.getName());
+					command = command.replaceAll("%killed_player%", e.getEntity().getName());
+					Bukkit.dispatchCommand(console, command);
+				}
+
+				/**********************************************
+				 *
+				 **********************************************/
+
 			} else if (QualityArmory.isCustomItem(e.getEntity().getItemInHand())) {
 				DEBUG("This player \"" + e.getEntity().getName() + "\" was killed by a player, but not with a gun");
 			}
@@ -743,6 +794,18 @@ public class QAListener implements Listener {
 	@SuppressWarnings({"deprecation"})
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onClick(final PlayerInteractEvent e) {
+
+		/**********************************************
+		 * BC ADDITION
+		 **********************************************/
+		if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && QAMain.enableInteract && e.getClickedBlock().getType().isInteractable()) {
+			QAMain.DEBUG("clicked: " + e.getClickedBlock().getType().toString());
+			return;
+		}
+		/**********************************************
+		 *
+		 **********************************************/
+
 		QAMain.DEBUG("InteractEvent Called. Custom item used = " + QualityArmory.isCustomItem(e.getPlayer().getItemInHand()));
 		if (!CustomItemManager.isUsingCustomData()) {
 			QAMain.DEBUG("Custom Data Check");

@@ -22,6 +22,10 @@ import me.zombie_striker.qg.guns.Gun;
 import me.zombie_striker.qg.guns.projectiles.*;
 import me.zombie_striker.qg.guns.reloaders.M1GarandReloader;
 import me.zombie_striker.qg.guns.reloaders.SlideReloader;
+
+//BC ADDITION
+import me.zombie_striker.qg.guns.reloaders.PaintballReloader;
+
 import me.zombie_striker.qg.guns.utils.GunRefillerRunnable;
 import me.zombie_striker.qg.guns.utils.WeaponSounds;
 import me.zombie_striker.qg.handlers.*;
@@ -253,6 +257,19 @@ public class QAMain extends JavaPlugin {
     public static boolean blockBreakTexture = false;
     public static boolean autoarm = false;
     public static List<UUID> currentlyScoping = new ArrayList<>();
+
+
+    /**********************************************************
+     * BC ADDITION
+     **********************************************************/
+    public static int WoundChance = 120;
+    public static double MobMulti = 3;
+    public static boolean enableInteract = false;
+    public static List<String> DeathCommand = new ArrayList<>();
+    public static int taserDuration = 5;
+    /***********************************************************
+     *
+     ***********************************************************/
     private static QAMain main;
 
     static {
@@ -374,9 +391,47 @@ public class QAMain extends JavaPlugin {
                         ItemStack check = (ItemStack) ings[i];
                         if (is.getType() == check.getType()
                                 && (check.getDurability() == 0 || is.getDurability() == check.getDurability())) {
-                            if (is.getAmount() >= check.getAmount())
-                                bb[i] = true;
-                            break;
+
+                            /**********************************************************
+                             * BC ADDITION
+                             **********************************************************/
+
+                            /*
+							if (is.getAmount() >= check.getAmount())
+								bb[i] = true;
+							break;
+							*/
+
+                            if(!check.getItemMeta().hasLore()) {
+                                if (is.getAmount() >= check.getAmount()) {
+                                    bb[i] = true;
+                                    break;
+                                }
+
+                            }
+                            else {
+                                String s;
+                                if(is.getItemMeta().hasLore()) {
+                                    s = is.getItemMeta().getLore().get(0).toString().replaceAll("\u00A7.","");
+                                }
+                                else {
+                                    s = "";
+                                }
+                                if(check.getItemMeta().getLore().get(0).toString().equals(s)){
+                                    if (is.getAmount() >= check.getAmount()) {
+                                        bb[i] = true;
+                                        break;
+                                    }
+                                }
+                                else {
+                                    bb[i] = false;
+                                }
+                            }
+
+                            /***********************************************************
+                             *
+                             ***********************************************************/
+
                         }
                     } else if (ings[i] instanceof String) {
                         CustomBaseObject base = QualityArmory.getCustomItemByName((String) ings[i]);
@@ -424,7 +479,34 @@ public class QAMain extends JavaPlugin {
                         }
                     } else if (ings[i] instanceof ItemStack) {
                         ItemStack check = (ItemStack) ings[i];
-                        if (is.getType() == check.getType() && is.getDurability() == check.getDurability()) {
+
+                        /******************************************************
+                         * BC ADDITION
+                         *******************************************************/
+
+                        //if (is.getType() == check.getType() && is.getDurability() == check.getDurability()) {
+
+                        boolean loreequals = false;
+                        String s;
+                        if(is.getItemMeta().hasLore()) {
+                            s = is.getItemMeta().getLore().get(0).toString().replaceAll("\u00A7.","");
+                        }
+                        else {
+                            s = "";
+                        }
+
+                        if (!check.getItemMeta().hasLore()) {
+                            loreequals = true;
+                        }
+                        else if(check.getItemMeta().getLore().get(0).toString().equals(s)) {
+                            loreequals = true;
+                        }
+                        if (is.getType() == check.getType() && (is.getDurability() == check.getDurability()) && loreequals) {
+
+                            /******************************************************
+                             *
+                             ******************************************************/
+
                             if (is.getAmount() > check.getAmount()) {
                                 bb[i] = true;
                                 int slot = player.getInventory().first(is);
@@ -528,6 +610,25 @@ public class QAMain extends JavaPlugin {
             basei += gunslistr.size();
         } else {
             for (Gun g : gunslistr) {
+
+                /**************************************************
+                 * BC ADDITION
+                 **************************************************/
+
+                ItemMeta temp = g.getItemStack().getItemMeta();
+                if (temp != null) {
+                    if (temp.hasLore()) {
+                        if (temp.getLore().get(4).contains("Team") || temp.getLore().get(4).contains("Paintballs") || temp.getLore().get(4).contains("Taser")) {
+                            DEBUG("Skipping add to shop: " + g.getName());
+                            continue;
+                        }
+                    }
+                }
+
+                /**************************************************
+                 *
+                 **************************************************/
+
                 if (basei < index) {
                     basei++;
                     continue;
@@ -543,6 +644,19 @@ public class QAMain extends JavaPlugin {
             basei += ammolistr.size();
         } else {
             for (CustomBaseObject ammo : ammolistr) {
+
+                /**************************************************
+                 * BC ADDITION
+                 **************************************************/
+
+                if (ammo.getName().equalsIgnoreCase("Paintball")) {
+                    continue;
+                }
+
+                /**************************************************
+                 *
+                 **************************************************/
+
                 if (basei < index) {
                     basei++;
                     continue;
@@ -841,6 +955,18 @@ public class QAMain extends JavaPlugin {
             langFolder.delete();
         }
         langFolder.mkdir();
+
+        /**********************************************************
+         * BC ADDITION
+         **********************************************************/
+
+        WoundChance = (int) a("WoundChance", WoundChance);
+        MobMulti = (double) a("MobDamageMultipler", MobMulti);
+
+        /***********************************************************
+         *
+         ***********************************************************/
+
         m = new MessagesYML(language, new File(langFolder, "message_" + language + ".yml"));
         prefix = LocalUtils.colorize((String) m.a("Prefix", prefix));
         S_ANVIL = LocalUtils.colorize((String) m.a("NoPermAnvilMessage", S_ANVIL));
@@ -986,6 +1112,17 @@ public class QAMain extends JavaPlugin {
 
         enableInteractChests = (boolean) a("enableInteract.Chests", false);
 
+        /**********************************************************
+         * BC ADDITION
+         **********************************************************/
+
+        taserDuration = (int) a("TaserDuration", 100);
+        enableInteract = (boolean) a("enableInteract.Chests", false);
+
+        /***********************************************************
+         *
+         ***********************************************************/
+
         overrideAnvil = (boolean) a("overrideAnvil", false);
 
         showCrashMessage = (boolean) a("showPossibleCrashHelpMessage", showCrashMessage);
@@ -1128,6 +1265,28 @@ public class QAMain extends JavaPlugin {
                 if (m.name().contains("DOOR") || m.name().contains("TRAPDOOR") || m.name().contains("BUTTON")
                         || m.name().contains("LEVER"))
                     interactableBlocks.add(m);
+
+        /**************************************************
+         * BC ADDITION
+         **************************************************/
+
+        List<String> deathcommands = (List<String>) a("DeathCommand", Collections.singletonList(""));
+        DeathCommand.clear();
+        for (String s : deathcommands) {
+            try {
+                DeathCommand.add(s);
+            } catch (Error | Exception e54) {
+                try {
+                    // destructableBlocks.add(Material.getMaterial(Integer.parseInt(s.split(":")[0])));
+                } catch (Error | Exception e5) {
+                }
+            }
+        }
+
+        /**************************************************
+         *
+         **************************************************/
+
 // Chris: default has 1.14 ItemType
         if ((MANUALLYSELECT18 || !isVersionHigherThan(1, 9)) && !MANUALLYSELECT113 && !MANUALLYSELECT14) {
             //1.8
@@ -1249,6 +1408,21 @@ public class QAMain extends JavaPlugin {
                 temp.setDurability(Short.parseShort(k[1]));
             if (k.length > 2)
                 temp.setAmount(Integer.parseInt(k[2]));
+
+            /**************************************************
+             * BC ADDITION
+             **************************************************/
+
+            if (k.length > 3) {
+                ItemMeta tempim = temp.getItemMeta();
+                tempim.setLore(Arrays.asList(k[3]));
+                temp.setItemMeta(tempim);
+            }
+
+            /**************************************************
+             *
+             **************************************************/
+
             list[i] = temp;
         }
         return list;

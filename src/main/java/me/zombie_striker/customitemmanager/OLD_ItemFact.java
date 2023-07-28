@@ -65,7 +65,25 @@ public class OLD_ItemFact {
 				StringBuilder sb = new StringBuilder();
 				// Chris: itemName from message.yml
 				String itemName = is.getType().name();
-				sb.append(ChatColor.RED + "- " + QAMain.findCraftEntityName(itemName, itemName) + " x " + is.getAmount());
+
+				/*********************************************************************
+				 * BC Addition
+				 *********************************************************************/
+
+				//sb.append(ChatColor.RED + "- " + QAMain.findCraftEntityName(itemName, itemName) + " x " + is.getAmount());
+
+				String tempName = QAMain.findCraftEntityName(itemName, itemName);
+				tempName = tempName.replaceAll("BLACK_DYE", "SMG TRIGGER");
+				tempName = tempName.replaceAll("IRON_HOE", "SNIPER BOLT");
+				tempName = tempName.replaceAll("STICK", "RIFLE BARREL");
+				tempName = tempName.replaceAll("CAULDRON", "PISTOL SLIDE");
+				tempName = tempName.replaceAll("RED_SANDSTONE_WALL", "SHOTGUN STOCK");
+				tempName = tempName.replaceAll("NETHER_STAR", "CRATE'S BLESSING");
+				sb.append(ChatColor.RED + "- " + tempName + " x " + is.getAmount());
+				/**********************************************************************
+				 *
+				 **********************************************************************/
+
 				if (is.getDurability() != 0)
 					sb.append(":" + is.getDurability());
 				lore.add(sb.toString());

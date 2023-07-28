@@ -206,9 +206,54 @@ public class Gun extends CustomBaseObject implements ArmoryBaseObject, Comparabl
 
         if (QAMain.enableDurability)
             if (current == null) {
-                double k = ((double) g.getDamage()) / g.getDurability();
-                ChatColor c = k > 0.5 ? ChatColor.DARK_GREEN : k > 0.25 ? ChatColor.GOLD : ChatColor.DARK_RED;
-                lore.add(c + QAMain.S_ITEM_DURIB + ":" + g.getDurability() + "/" + g.getDurability());
+
+                /********************************************************
+                 * BC ADDITION
+                 ********************************************************/
+
+                //double k = ((double) g.getDamage()) / g.getDurability();
+                //ChatColor c = k > 0.5 ? ChatColor.DARK_GREEN : k > 0.25 ? ChatColor.GOLD : ChatColor.DARK_RED;
+                //lore.add(c + QAMain.S_ITEM_DURIB + ":" + g.getDurability() + "/" + g.getDurability());
+
+
+                if (g.getDurability() == -1) {
+                    lore.add("Unbreakable");
+                }
+                else if (g.getDurability() == -10) {
+                    lore.add("Team Red");
+                }
+                else if (g.getDurability() == -11) {
+                    lore.add("Team Blue");
+                }
+                else if (g.getDurability() == -15) {
+                    lore.add("Orange Paintballs");
+                }
+                else if (g.getDurability() == -16) {
+                    lore.add("Blue Paintballs");
+                }
+                else if (g.getDurability() == -17) {
+                    lore.add("Purple Paintballs");
+                }
+                else if (g.getDurability() == -18) {
+                    lore.add("Fuchsia Paintballs");
+                }
+                else if (g.getDurability() == -19) {
+                    lore.add("Turquiose Paintballs");
+                }
+                else if (g.getDurability() == -20) {
+                    lore.add("Lime Paintballs");
+                }
+                else if (g.getDurability() == -25) {
+                    lore.add("Police Issued Taser");
+                }
+                else {
+                    lore.add(QAMain.S_ITEM_DURIB + ": " + g.getDurability() + "/" + g.getDurability());
+                }
+
+                /********************************************************
+                 *
+                 ********************************************************/
+
             } else {
                 lore = setDurabilityDamage(g, lore, getDamage(current));
             }
@@ -257,18 +302,53 @@ public class Gun extends CustomBaseObject implements ArmoryBaseObject, Comparabl
     }
 
     public static List<String> setDurabilityDamage(Gun g, List<String> lore, int damage) {
+
+        /********************************************************
+         * BC ADDITION
+         ********************************************************/
+
+        if(g.getDurability() == -1 || g.getDurability() <= -10) {
+            return lore;
+        }
+
+        /********************************************************
+         *
+         ********************************************************/
+
         boolean foundLine = false;
         double k = ((double) damage) / g.getDurability();
         ChatColor c = k > 0.5 ? ChatColor.DARK_GREEN : k > 0.25 ? ChatColor.GOLD : ChatColor.DARK_RED;
         for (int j = 0; j < lore.size(); j++) {
             if (ChatColor.stripColor(lore.get(j)).contains(ChatColor.stripColor(QAMain.S_ITEM_DURIB))) {
-                lore.set(j, c + QAMain.S_ITEM_DURIB + ":" + damage + "/" + g.getDurability());
+
+                /********************************************************
+                 * BC ADDITION
+                 ********************************************************/
+
+                //lore.set(j, c + QAMain.S_ITEM_DURIB + ":" + damage + "/" + g.getDurability());
+                lore.set(j, c + QAMain.S_ITEM_DURIB + ": " + damage + "/" + g.getDurability());
+
+                /********************************************************
+                 *
+                 ********************************************************/
+
                 foundLine = true;
                 break;
             }
         }
         if (!foundLine) {
-            lore.add(c + QAMain.S_ITEM_DURIB + ":" + damage + "/" + g.getDurability());
+
+            /********************************************************
+             * BC ADDITION
+             ********************************************************/
+
+            //lore.add(c + QAMain.S_ITEM_DURIB + ":" + damage + "/" + g.getDurability());
+            lore.add(c + QAMain.S_ITEM_DURIB + ": " + damage + "/" + g.getDurability());
+
+            /********************************************************
+             *
+             ********************************************************/
+
         }
         return lore;
     }
@@ -819,6 +899,12 @@ public class Gun extends CustomBaseObject implements ArmoryBaseObject, Comparabl
 
         QAMain.DEBUG("Made it to gun/attachment check : " + getName());
         try {
+
+            /********************************************************
+             * BC ADDITION
+             ********************************************************/
+
+            /*
             if (QAMain.enableInteractChests) {
                 Block b = player.getTargetBlock(null, 6);
                 if (b != null
@@ -829,6 +915,20 @@ public class Gun extends CustomBaseObject implements ArmoryBaseObject, Comparabl
                     return true;
                 }
             }
+            */
+
+            if (QAMain.enableInteract) {
+                Block b = player.getTargetBlock(null, 6);
+                if (b != null && b.getType().isInteractable()) {
+                    QAMain.DEBUG("Chest interactable check has return true!");
+                    return true;
+                }
+            }
+
+            /********************************************************
+             *
+             ********************************************************/
+
         } catch (Error | Exception e4) {
         }
 
@@ -911,7 +1011,18 @@ public class Gun extends CustomBaseObject implements ArmoryBaseObject, Comparabl
                     }
                     return true;
                 }
-                if (!QAMain.enableDurability || getDamage(usedItem) > 0) {
+
+                /********************************************************
+                 * BC ADDITION
+                 ********************************************************/
+
+                //if (!QAMain.enableDurability || getDamage(usedItem) > 0) {
+                if(!QAMain.enableDurability || getDamage(usedItem) > 0  || getDamage(usedItem) == -1) {
+
+                /********************************************************
+                 *
+                 ********************************************************/
+
                     boolean automaticfiring = true;
                     if (!QAMain.SWAP_TO_LMB_SHOOT) {
                         if (lastRMB.containsKey(player.getUniqueId())) {

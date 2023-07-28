@@ -10,6 +10,9 @@ public class ReloadingManager {
 	public static final String SLIDE_RELOAD = ("SlideReload");
 	public static final String M1GARAND_RELOAD=("M1GarandReload");
 
+	// BC ADDITION
+	public static final String PAINTBALL_RELOAD=("PaintballReload");
+
 	public static final HashMap<String, ReloadingHandler> handlers = new HashMap<>();
 	
 

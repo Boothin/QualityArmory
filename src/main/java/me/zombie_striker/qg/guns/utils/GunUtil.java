@@ -34,6 +34,21 @@ import ru.beykerykt.minecraft.lightapi.common.LightAPI;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
+/********************************************************
+ * BC ADDITION
+ ********************************************************/
+
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.AnaloguePowerable;
+import org.bukkit.Particle.DustOptions;
+import org.bukkit.command.ConsoleCommandSender;
+
+/********************************************************
+ *
+ ********************************************************/
+
 public class GunUtil {
 
 	public static HashMap<UUID, BukkitTask> rapidfireshooters = new HashMap<>();
@@ -177,6 +192,137 @@ public class GunUtil {
 
 
 			if (hitTarget != null) {
+
+
+				/********************************************************
+				 * BC ADDITION
+				 ********************************************************/
+				QAMain.DEBUG("checking lore");
+				if (g.getCustomLore() != null) {
+					QAMain.DEBUG("got lore");
+					List<String> lore = new ArrayList<String>();
+					ItemStack gunItemStack;
+					boolean isPaintball = false;
+					boolean isTaser = false;
+					if(QualityArmory.isGun(p.getInventory().getItemInMainHand())) {
+						gunItemStack = p.getInventory().getItemInMainHand();
+					}
+					else if(QualityArmory.isGun(p.getInventory().getItemInOffHand())) {
+						gunItemStack = p.getInventory().getItemInOffHand();
+					}
+					else {
+						break;
+					}
+					try {
+						List<Player> players = QAMain.getInstance().getServer().getWorld("world").getPlayers();
+						lore = gunItemStack.getItemMeta().getLore();
+						QAMain.DEBUG(lore.toString());
+						Color pbColor = Color.fromRGB(255,255,255);
+						if(lore.get(3).contains("Team Red")) {
+							pbColor = Color.fromRGB(249, 128, 29);
+							isPaintball = true;
+							/*
+							Location arena = new Location(QAMain.getInstance().getServer().getWorld("world"), -674, 70, 3635);
+
+							if(arena.distance(hitTarget.getLocation()) > 50) {
+								break;
+							}
+							if(hitTarget instanceof Player) {
+								for(Player temp : players) {
+									if(temp.getLocation().distance(arena) < 50) {
+										temp.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e" + hitTarget.getName() + " &4was hit by &c" + p.getName() + "!"));
+									}
+								}
+							}
+							*/
+						}
+						else if(lore.get(3).contains("Team Blue")) {
+							pbColor = Color.fromRGB(58, 179, 218);
+							isPaintball = true;
+							/*
+							Location arena = new Location(QAMain.getInstance().getServer().getWorld("world"), -674, 70, 3635);
+							if(arena.distance(hitTarget.getLocation()) > 50) {
+								break;
+							}
+							if(hitTarget instanceof Player) {
+								for(Player temp : players) {
+									if(temp.getLocation().distance(arena) < 50) {
+										temp.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e" + hitTarget.getName() + " &4was hit by &9" + p.getName() + "!"));
+									}
+								}
+							}
+							*/
+						}
+						else if(lore.get(3).contains("Orange Paintballs")) {
+							pbColor = Color.fromRGB(250, 90, 0);
+							isPaintball = true;
+						}
+						else if(lore.get(3).contains("Blue Paintballs")) {
+							pbColor = Color.fromRGB(40, 81, 246);
+							isPaintball = true;
+						}
+						else if(lore.get(3).contains("Purple Paintballs")) {
+							pbColor = Color.fromRGB(200, 0, 220);
+							isPaintball = true;
+						}
+						else if(lore.get(3).contains("Fuchsia Paintballs")) {
+							pbColor = Color.fromRGB(249, 49, 149);
+							isPaintball = true;
+						}
+						else if(lore.get(3).contains("Turquiose Paintballs")) {
+							pbColor = Color.fromRGB(0, 200 ,180);
+							isPaintball = true;
+						}
+						else if(lore.get(3).contains("Lime Paintballs")) {
+							pbColor = Color.fromRGB(160, 204, 10);
+							isPaintball = true;
+						}
+						else if(lore.get(3).contains("Taser")) {
+							pbColor = Color.fromRGB(0, 200 ,180);
+							isTaser = true;
+						}
+						if (isPaintball) {
+							QAMain.DEBUG("Spawn Particles");
+							DustOptions dustOptions = new DustOptions(pbColor, 3);
+							hitTarget.getLocation().getWorld().spawnParticle(Particle.REDSTONE, hitTarget.getLocation(), 125, 1, 1, 1, dustOptions);
+							Location arena = new Location(QAMain.getInstance().getServer().getWorld("world"), -674, 70, 3635);
+							if(arena.distance(hitTarget.getLocation()) > 50) {
+								break;
+							}
+							if(hitTarget instanceof Player) {
+								for(Player temp : players) {
+									if(temp.getLocation().distance(arena) < 50) {
+										java.awt.Color jColor = new java.awt.Color(pbColor.asRGB());
+										BaseComponent[] componentBuilder = new ComponentBuilder(hitTarget.getName()).color(net.md_5.bungee.api.ChatColor.GOLD).append(" was hit by ").color(net.md_5.bungee.api.ChatColor.DARK_RED).append(p.getName()).color(net.md_5.bungee.api.ChatColor.of(jColor)).create();
+										temp.spigot().sendMessage(componentBuilder);
+										//temp.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e" + hitTarget.getName() + " &4was hit by &9" + p.getName() + "!"));
+									}
+								}
+							}
+						}
+
+						else if (isTaser) {
+							if (hitTarget instanceof Player) {
+								final Player temp = (Player) hitTarget;
+								Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "settased " + hitTarget.getName() + " " + QAMain.taserDuration);
+								temp.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cYour muscles tense up as you're hit by a taser!"));
+								DustOptions dustOptions = new DustOptions(pbColor, 3);
+								hitTarget.getLocation().getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hitTarget.getLocation(), 200, 2, 2, 2);
+								hitTarget.getLocation().getWorld().spawnParticle(Particle.REDSTONE, hitTarget.getLocation(), 125, 1, 1, 1, dustOptions);
+								hitTarget.getLocation().getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hitTarget.getLocation(), 200, 2, 2, 2);
+							}
+						}
+
+					}
+					catch(Exception e) {
+						QAMain.DEBUG("Exception: " + e.toString());
+					}
+				}
+
+				/********************************************************
+				 *
+				 ********************************************************/
+
 				if (!(hitTarget instanceof Player) || QualityArmory.allowGunsInRegion(hitTarget.getLocation())) {
 
 					boolean headshot = hitBox.allowsHeadshots() && hitBox.intersectsHead(bulletHitLoc, hitTarget);
@@ -278,7 +424,50 @@ public class GunUtil {
 							}
 						}else {
 							if (hitTarget instanceof Damageable) {
-								((Damageable) hitTarget).damage(damageMAX, p);
+
+								/***********************************************
+								 * BC ADDITION
+								 ***********************************************/
+
+								//((Damageable) hitTarget).damage(damageMAX, p);
+
+								if (hitTarget instanceof Mob) {
+									Random rand = new Random();
+									double rand_d = (rand.nextDouble() * 0.2) - 0.1 + 1.0; //90-110% damage variability
+									double damageMob = rand_d*damageMAX*QAMain.MobMulti;
+									((Damageable) hitTarget).damage(damageMob, p);
+									QAMain.DEBUG("Damaging entity " + hitTarget.getName() + " ( "
+											+ ((LivingEntity) hitTarget).getHealth() + "/"
+											+ ((LivingEntity) hitTarget).getMaxHealth() + " :" + damageMob + " DAM)");
+								}
+								else {
+									Random rand = new Random();
+									double rand_d = (rand.nextDouble() * 0.2) - 0.1 + 1.0; //90-110% damage variability
+									((Damageable) hitTarget).damage(damageMAX*rand_d, p);
+									if (hitTarget instanceof Player) {
+										int rand_int = rand.nextInt(QAMain.WoundChance);
+										if(rand_int == 0) {
+											try {
+												if (!g.getAmmoType().getName().equalsIgnoreCase("Paintball")) {
+													String infectcmd = "disease infect " + hitTarget.getName() + " OpenWound";
+													ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+													Bukkit.dispatchCommand(console, infectcmd);
+												}
+											}
+											catch(Exception e){
+												System.out.println(e.toString());
+											}
+										}
+									}
+									QAMain.DEBUG("Damaging entity " + hitTarget.getName() + " ( "
+											+ ((LivingEntity) hitTarget).getHealth() + "/"
+											+ ((LivingEntity) hitTarget).getMaxHealth() + " :" + damageMAX + " DAM)");
+								}
+
+								/***********************************************
+								 *
+								 ***********************************************/
+
 							} else if (hitTarget instanceof EnderDragon) {
 								((EnderDragon) hitTarget).damage(damageMAX, p);
 							} else if (hitTarget instanceof EnderDragonPart) {
@@ -339,6 +528,46 @@ public class GunUtil {
 							if ((QAMain.destructableBlocks.contains(type) || g.getBreakableMaterials().contains(type)) && ProtectionHandler.canBreak(start)) {
 								blocksThatWillBreak.add(block);
 							}
+
+							/***********************************************************
+							 * BC ADDITION
+							 ***********************************************************
+							 */
+
+							try {
+								double xpos = start.getX();
+								double ypos = start.getY();
+								double zpos = start.getZ();
+								QAMain.DEBUG("x:" + xpos + " y:" + ypos + " z:" + zpos);
+								if (start.getBlock().getType().equals(org.bukkit.Material.TARGET)) {
+									QAMain.DEBUG("Hit target block");
+									BlockData bd = start.getBlock().getBlockData();
+									if (bd instanceof AnaloguePowerable) {
+										AnaloguePowerable temp = (AnaloguePowerable) bd;
+										QAMain.DEBUG("is powered: " + temp.getPower());
+										temp.setPower(temp.getMaximumPower());
+										start.getBlock().setBlockData(temp);
+										new BukkitRunnable() {
+											Block bl = start.getBlock();
+											@Override
+											public void run() {
+												AnaloguePowerable temp = (AnaloguePowerable) bl.getBlockData();
+												temp.setPower(0);
+												bl.setBlockData(temp);
+											}
+										}.runTaskLater(QAMain.getInstance(), 20);
+									}
+								}
+							}
+							catch(Exception e) {
+
+							}
+
+							/***********************************************************
+							 *
+							 ***********************************************************/
+
+
 						}
 
 						if (!solid) {
@@ -657,8 +886,7 @@ public class GunUtil {
 		// Todo exp
 	}
 
-	public static void playShoot(final Gun g, final Player player) {
-		g.damageDurability(player);
+	public static void playShoot(final Gun g, final Player player) {g.damageDurability(player);
 		new BukkitRunnable() {
 			@SuppressWarnings("deprecation")
 			@Override

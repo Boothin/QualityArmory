@@ -30,7 +30,10 @@ public enum WeaponSounds {
 	GUN_MAUSER("bulletmauser"),GUN_AK47("bulletak47"),RELOAD_FN("reloadfn"),RELOAD_M16("reloadm16"),RELOAD_SHOTGUN("reloadshotgun"),GUN_SHOTGUN("bulletshotgun"),
 	RELOAD_SHELL("reloadshell"),
 
-	DEFAULT("hurt");
+	DEFAULT("hurt"),
+
+	//BC ADDITION
+	RELOAD_PAINTBALL("pbreload");
 
 	private String soundname;
 

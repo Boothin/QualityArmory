@@ -114,6 +114,7 @@ public class AmmoBag extends CustomBaseObject implements ArmoryBaseObject {
     }
 
     public void updateAmmoLore(@NotNull ItemStack item, int newAmmo) {
+        QAMain.DEBUG("update ammo lore");
         ItemMeta meta = item.getItemMeta();
         Objects.requireNonNull(meta);
 
@@ -123,10 +124,12 @@ public class AmmoBag extends CustomBaseObject implements ArmoryBaseObject {
         if (meta.hasLore()) {
             lore = meta.getLore();
             Objects.requireNonNull(lore);
+            QAMain.DEBUG("ammo lore " + lore.toString());
         }
 
         for (int i = 0; i < lore.size(); i++) {
             if (ChatColor.stripColor(lore.get(i)).contains(ChatColor.stripColor(QAMain.bagAmmo))) {
+                QAMain.DEBUG("searching for ammo lore");
                 lore.set(i, QAMain.bagAmmo + newAmmo + "/" + maxAmmo);
                 foundLine = true;
                 break;
@@ -134,6 +137,7 @@ public class AmmoBag extends CustomBaseObject implements ArmoryBaseObject {
         }
 
         if (!foundLine) {
+            QAMain.DEBUG("no ammo lore");
             lore.add(QAMain.bagAmmo + newAmmo + "/" + maxAmmo);
         }
 
